@@ -2,8 +2,8 @@
   "name": "hardhat-project",
   "version": "0.0.1",
   "scripts": {
-    "compile": "npx hardhat compile",
-    "test": "npx hardhat test"
+    "compile": "hardhat compile",
+    "test": "hardhat test"
   },
   "devDependencies": {
     "@aztec/bb.js": "0.67.1",
