@@ -5,7 +5,7 @@ import os from "node:os";
 it("proves and verifies on-chain", async () => {
   // Generate a proof
   const main = await getCircuit("main");
-  const rec = await getCircuit("recursive");
+  const rec = await getCircuit("recursive", { recursive: true });
   const input = { x: 1, y: 2 };
   const { witness } = await main.noir.execute(input);
   const mainProof = await main.backend.generateProof(witness);
@@ -24,18 +24,24 @@ it("proves and verifies on-chain", async () => {
   console.log("recursiveInputs", recursiveInputs);
 
   const { witness: recWitness } = await rec.noir.execute(recursiveInputs);
+  console.log("got recursive witness, generating proof...");
   const recProof = await rec.backend.generateProof(recWitness);
   const result = await rec.backend.verifyProof(recProof);
   expect(result).to.eq(true);
 });
 
-async function getCircuit(name: string) {
+async function getCircuit(name: string, { recursive = false } = {}) {
   const { Noir } = await import("@noir-lang/noir_js");
   const { UltraPlonkBackend } = await import("@aztec/bb.js");
   const circuit = await hre.noir.getCircuitJson(name);
   const noir = new Noir(circuit);
-  const backend = new UltraPlonkBackend(circuit.bytecode, {
-    threads: os.cpus().length,
-  });
+  const backend = new UltraPlonkBackend(
+    circuit.bytecode,
+    {
+      threads: os.cpus().length,
+    },
+    // setting this flag does not help
+    { recursive },
+  );
   return { noir, backend };
 }
